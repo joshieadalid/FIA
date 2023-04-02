@@ -38,7 +38,7 @@ public class Agente extends Thread {
         this.casillaLibre[2] = false;
         this.casillaLibre[3] = false;
         this.position = new Position(aleatorio.nextInt(matrix.length), aleatorio.nextInt(matrix.length));
-        tablero[position.getI()][position.getJ()].setIcon(icon);
+        tablero[position.i][position.j].setIcon(icon);
     }
 
     public void run() {
@@ -46,7 +46,6 @@ public class Agente extends Thread {
         buscarPosicionNave();
 
         while (true) {
-
             //Algoritmo para que el robot únicamente se mueva en cruz (arriba-abajo, izquierda-derecha)
             movement();
             try {
@@ -61,41 +60,45 @@ public class Agente extends Thread {
     // Métodos auxiliares
     public synchronized void refrescar() {
         casillaAnterior.setIcon(null); // Elimina su figura de la casilla anterior
-        tablero[position.getI()][position.getJ()].setIcon(icon); // Pone su figura en la nueva casilla
+        tablero[position.i][position.j].setIcon(icon); // Pone su figura en la nueva casilla
     }
 
     private boolean sensor(Position dir) {
-        if (position.getI() + dir.getI() >= 0 && position.getI() + dir.getI() < matrix.length && position.getJ() + dir.getJ() >= 0 && position.getJ() + dir.getJ() < matrix.length) {
-            int type = matrix[position.getI() + dir.getI()][position.getJ() + dir.getJ()];
+        if (position.i + dir.i >= 0 && position.i + dir.i < matrix.length && position.j + dir.j >= 0 && position.j + dir.j < matrix.length) {
+            int type = matrix[position.i + dir.i][position.j + dir.j];
             return type != 1 && type != 2 && type != 3;
         } else {
             return false;
         }
     }
 
-    private boolean isSample(Position dir) {
-        if (position.getI() + dir.getI() >= 0 && position.getI() + dir.getI() < matrix.length && position.getJ() + dir.getJ() >= 0 && position.getJ() + dir.getJ() < matrix.length) {
-            return matrix[position.getI() + dir.getI()][position.getJ() + dir.getJ()] == 1;
+    private boolean inBounds(Position pos){
+        return (position.i + pos.i >= 0 && position.i + pos.i < matrix.length && position.j + pos.j >= 0 && position.j + pos.j < matrix.length);
+    }
+
+    private boolean isSample(Position pos) {
+        if (inBounds(pos)){
+            return matrix[position.i + pos.i][position.j + pos.j] == 1;
         } else {
             return false;
         }
     }
 
     private void mover(Position dir) {
-        casillaAnterior = tablero[position.getI()][position.getJ()];
-        position.setI(position.getI() + dir.getI());
-        position.setJ(position.getJ() + dir.getJ());
+        casillaAnterior = tablero[position.i][position.j];
+        position.i += dir.i;
+        position.j += dir.j;
         refrescar();
     }
 
     void agarrarMuestra(Position dir) {
         System.out.println(nombre + ": Muestra agarrada");
         tieneMuestra = true;
-        matrix[position.getI() + dir.getI()][position.getJ() + dir.getJ()] = 0;
+        matrix[position.i + dir.i][position.j + dir.j] = 0;
     }
 
     Position movimientoNave() {
-        //System.out.printf("%s(%d, %d) -> nave(%d, %d)%n", nombre, position.getI(), position.getJ(), iNave, jNave);
+        //System.out.printf("%s(%d, %d) -> nave(%d, %d)%n", nombre, position.i, position.j, iNave, jNave);
         ArrayList<DireccionDistancia> distancias = new ArrayList<>();
         final Position arriba = new Position(-1, 0);
         final Position abajo = new Position(1, 0);
@@ -103,19 +106,19 @@ public class Agente extends Thread {
         final Position izquierda = new Position(0, -1);
 
         if (sensor(arriba)) {
-            double distArriba = sqrt(pow(iNave - (position.getI() + arriba.getI()), 2) + pow((jNave - (position.getJ() + arriba.getJ())), 2));
+            double distArriba = sqrt(pow(iNave - (position.i + arriba.i), 2) + pow((jNave - (position.j + arriba.j)), 2));
             distancias.add(new DireccionDistancia("Arriba", distArriba));
         }
         if (sensor(abajo)) {
-            double distAbajo = sqrt(pow((iNave - (position.getI() + abajo.getI())), 2) + pow((jNave - (position.getJ() + abajo.getJ())), 2));
+            double distAbajo = sqrt(pow((iNave - (position.i + abajo.i)), 2) + pow((jNave - (position.j + abajo.j)), 2));
             distancias.add(new DireccionDistancia("Abajo", distAbajo));
         }
         if (sensor(derecha)) {
-            double distDerecha = sqrt(pow((iNave - (position.getI() + derecha.getI())), 2) + pow(jNave - (position.getJ() + (derecha.getJ())), 2));
+            double distDerecha = sqrt(pow((iNave - (position.i + derecha.i)), 2) + pow(jNave - (position.j + (derecha.j)), 2));
             distancias.add(new DireccionDistancia("Derecha", distDerecha));
         }
         if (sensor(izquierda)) {
-            double distIzquierda = sqrt(pow((iNave - (position.getI() + izquierda.getI())), 2) + pow((jNave - (position.getJ() + abajo.getJ())), 2));
+            double distIzquierda = sqrt(pow((iNave - (position.i + izquierda.i)), 2) + pow((jNave - (position.j + abajo.j)), 2));
             distancias.add(new DireccionDistancia("Izquierda", distIzquierda));
         }
 
@@ -159,9 +162,12 @@ public class Agente extends Thread {
                     direction = new Position(0, -1);
         }
 
-        if (isSample(direction)) if (!tieneMuestra) {
-            agarrarMuestra(direction);
-            mover(direction);
+        Position newPosition = new Position(position.i + direction.i, position.j+ direction.j);
+        if (isSample(newPosition)){
+            if (!tieneMuestra) {
+                agarrarMuestra(direction);
+
+            }
         }
 
         if (tieneMuestra) {
