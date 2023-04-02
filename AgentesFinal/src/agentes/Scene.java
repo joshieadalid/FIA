@@ -11,7 +11,7 @@ public class Scene extends JFrame {
     private final JLabel[][] board = new JLabel[dim][dim];
     private final Agent wallE;
     private final Agent eva;
-    ImageIcon obstacleIcon = new ImageIcon("img/obstacle.png");
+    ImageIcon obstacleIcon = new ImageIcon("img/bomb.png");
     ImageIcon sampleIcon = new ImageIcon("img/sample.png");
     ImageIcon spacecraftIcon = new ImageIcon("img/spacecraft.png");
     private ImageIcon selectedIcon;
