@@ -1,11 +1,8 @@
 package agentes;
 
-public record Node( Position position,double distance) {
+public record Node(Position position, double distance) {
     @Override
     public String toString() {
-        return "Node{" +
-                "pos=" + position +
-                ", distance=" + distance +
-                '}';
+        return "Node{pos=" + position + ", distance=" + distance + '}';
     }
 }
