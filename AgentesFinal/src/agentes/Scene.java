@@ -3,6 +3,7 @@ package agentes;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.stream.IntStream;
 
 public class Scene extends JFrame {
 
@@ -83,27 +84,27 @@ public class Scene extends JFrame {
 
 
     private void createBoard(int dim) {
-        for (int i = 0; i < dim; ++i) {
-            for (int j = 0; j < dim; ++j) {
-                board[i][j] = new JLabel();
-                board[i][j].setBounds(j * 50 + 12, i * 50 + 12, 50, 50);
-                board[i][j].setBorder(BorderFactory.createDashedBorder(Color.white));
-                board[i][j].setOpaque(false);
-                this.add(board[i][j]);
-                // Este listener nos ayuda a agregar poner objetos en la rejilla
-                this.board[i][j].addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mousePressed(MouseEvent e) {
-                        insertInterface(e);
-                    }
+        IntStream.range(0, dim)
+                .forEach(i ->
+                        IntStream.range(0, dim)
+                                .forEach(j -> {
+                                    board[i][j] = new JLabel();
+                                    board[i][j].setBounds(j * 50 + 12, i * 50 + 12, 50, 50);
+                                    board[i][j].setBorder(BorderFactory.createDashedBorder(Color.white));
+                                    board[i][j].setOpaque(false);
+                                    this.add(board[i][j]);
+                                    board[i][j].addMouseListener(new MouseAdapter() {
+                                        @Override
+                                        public void mousePressed(MouseEvent e) {
+                                            insertInterface(e);
+                                        }
 
-                    @Override
-                    public void mouseReleased(MouseEvent e) {
-                        insertInterface(e);
-                    }
-                });
-            }
-        }
+                                        @Override
+                                        public void mouseReleased(MouseEvent e) {
+                                            insertInterface(e);
+                                        }
+                                    });
+                                }));
     }
 
 
