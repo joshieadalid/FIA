@@ -35,6 +35,6 @@ public class AgentFunctions {
 
 
     public static Direction absPosition(Position position) {
-        return new Direction(Math.abs(position.i()), Math.abs(position.i()));
+        return new Direction(Math.abs(position.i()), Math.abs(position.j()));
     }
 }

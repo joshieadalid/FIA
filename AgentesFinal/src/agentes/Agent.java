@@ -50,7 +50,7 @@ public class Agent extends Thread {
             //Algoritmo para que el robot únicamente se mueva en cruz (arriba-abajo, izquierda-derecha)
             selectMovement();
             try {
-                Thread.sleep(500 + waitingTime.nextInt(100));
+                Thread.sleep(100 + waitingTime.nextInt(100));
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
