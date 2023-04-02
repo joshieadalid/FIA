@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class BackgroundPanel extends JPanel {
-    ImageIcon fondo;
+    private final ImageIcon fondo;
 
     public BackgroundPanel(ImageIcon fondo) {
         super();

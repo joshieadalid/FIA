@@ -7,6 +7,7 @@ public class AgentFunctions {
     public static final int typeSample = 1;
     public static final int typeObstacle = 2;
     public static final int typeSpacecraft = 3;
+    private static final Random random = new Random(System.nanoTime());
 
     public static boolean inBounds(int[][] matrix, Position position) {
         return (position.i() >= 0 && position.i() < matrix.length && position.j() >= 0 && position.j() < matrix[0].length);
@@ -16,9 +17,8 @@ public class AgentFunctions {
         return inBounds(matrix, position) && matrix[position.i()][position.j()] == type;
     }
 
-    private static final Random directionSelect = new Random(System.nanoTime());
     public static Direction randomDirection() {
-        int dirSelect = directionSelect.nextInt(4);
+        int dirSelect = random.nextInt(4);
         return switch (dirSelect) {
             case 0 -> new Direction(-1, 0); // Arriba
             case 1 -> new Direction(+1, 0); // Abajo
@@ -30,7 +30,6 @@ public class AgentFunctions {
 
 
     public static Position randomMatrixPosition(int i, int j) {
-        Random r = new Random(System.currentTimeMillis());
-        return new Position(r.nextInt(i), r.nextInt(j));
+        return new Position(random.nextInt(i), random.nextInt(j));
     }
 }

@@ -6,14 +6,14 @@ import java.awt.event.*;
 
 public class Scene extends JFrame {
 
-    private final int dim = 12;
+    private static final int dim = 12;
     private final JMenu settings = new JMenu("Settings");
     private final JLabel[][] board = new JLabel[dim][dim];
     private final Agent wallE;
     private final Agent eva;
-    ImageIcon obstacleIcon = new ImageIcon("img/bomb.png");
-    ImageIcon sampleIcon = new ImageIcon("img/sample.png");
-    ImageIcon spacecraftIcon = new ImageIcon("img/spacecraft.png");
+    private ImageIcon obstacleIcon = new ImageIcon("img/bomb.png");
+    private ImageIcon sampleIcon = new ImageIcon("img/sample.png");
+    private ImageIcon spacecraftIcon = new ImageIcon("img/spacecraft.png");
     private ImageIcon selectedIcon;
 
     public Scene() {
@@ -55,7 +55,7 @@ public class Scene extends JFrame {
         this.setLayout(null);
         int[][] matrix = new int[dim][dim];
         createBoard(dim);
-        exit.addActionListener(this::gestionaSalir);
+        exit.addActionListener(this::exitInterface);
         run.addActionListener(this::runInterface);
 
         IconSelector iconSelector = new IconSelector();
@@ -65,7 +65,7 @@ public class Scene extends JFrame {
 
         class MyWindowAdapter extends WindowAdapter {
             public void windowClosing(WindowEvent eventObject) {
-                goodBye();
+                System.exit(0);
             }
         }
         addWindowListener(new MyWindowAdapter());
@@ -77,16 +77,10 @@ public class Scene extends JFrame {
     }
 
 
-    private void gestionaSalir(ActionEvent eventObject) {
-        goodBye();
+    private void exitInterface(ActionEvent eventObject) {
+        System.exit(0);
     }
 
-    private void goodBye() {
-//        int option = JOptionPane.showConfirmDialog(rootPane, "Desea salir?", "Aviso", JOptionPane.YES_NO_OPTION);
-//        if (option == JOptionPane.YES_OPTION) {
-        System.exit(0);
-//        }
-    }
 
     private void createBoard(int dim) {
         for (int i = 0; i < dim; ++i) {

@@ -21,7 +21,7 @@ public class Agent extends Thread {
     private final ImageIcon agentIcon;
     private final int[][] matrix;
     private final JLabel[][] board;
-    private Position position;
+    private Position agentPosition;
     private Position spacecraftPosition;
     private boolean hasSample;
     private JLabel lastSquare;
@@ -32,15 +32,14 @@ public class Agent extends Thread {
         this.matrix = matrix;
         this.board = board;
         this.hasSample = false;
-
-        this.position = randomMatrixPosition(matrix.length, matrix[0].length);
-        board[position.i()][position.j()].setIcon(agentIcon);
+        this.agentPosition = randomMatrixPosition(matrix.length, matrix[0].length);
+        board[agentPosition.i()][agentPosition.j()].setIcon(agentIcon);
     }
 
-    private static Position spacecraftPosition(int[][] matrix) {
+    private static Position findSpacecraftPosition(int[][] matrix) {
         for (int i = 0; i < matrix.length; ++i) {
             for (int j = 0; j < matrix[0].length; ++j) {
-                if (matrix[i][j] == 3) {
+                if (matrix[i][j] == typeSpacecraft) {
                     return new Position(i, j);
                 }
             }
@@ -51,7 +50,7 @@ public class Agent extends Thread {
     @Override
     public void run() {
         mapSamples();
-        this.spacecraftPosition = spacecraftPosition(matrix);
+        this.spacecraftPosition = findSpacecraftPosition(matrix);
         while (true) {
             // Algoritmo para que el robot únicamente se mueva en cruz (arriba-abajo, izquierda-derecha)
             selectMovement();
@@ -62,15 +61,27 @@ public class Agent extends Thread {
             }
         }
     }
-
+    private void mapSamples() {
+        for (int i = 0; i < matrix.length; ++i) {
+            for (int j = 0; j < matrix[0].length; ++j) {
+                String objectName = board[i][j].getName();
+                if (objectName != null) {
+                    Integer objectType = OBJECT_TYPES.get(objectName);
+                    if (objectType != null) {
+                        matrix[i][j] = objectType;
+                    }
+                }
+            }
+        }
+    }
     public synchronized void refresh() {
         lastSquare.setIcon(null); // Elimina su figura de la casilla anterior
-        board[position.i()][position.j()].setIcon(agentIcon); // Pone su figura en la nueva casilla
+        board[agentPosition.i()][agentPosition.j()].setIcon(agentIcon); // Pone su figura en la nueva casilla
     }
 
     private void move(Position position) {
-        lastSquare = board[this.position.i()][this.position.j()];
-        this.position = position;
+        lastSquare = board[this.agentPosition.i()][this.agentPosition.j()];
+        this.agentPosition = position;
         refresh();
     }
 
@@ -88,11 +99,11 @@ public class Agent extends Thread {
     public Direction spacecraftDirection() {
         List<Position> availableDirections = Stream.of(
                         new Position(-1, 0), new Position(1, 0), new Position(0, -1), new Position(0, 1)
-                ).filter(pos -> isType(matrix, position.addPosition(pos), typeEmpty))
+                ).filter(pos -> isType(matrix, agentPosition.addPosition(pos), typeEmpty))
                 .collect(Collectors.toList());
 
         Comparator<Position> manhattanComparator = Comparator.comparingInt(pos ->
-                this.spacecraftPosition.subtractPosition(position.addPosition(pos)).manhattan()
+                this.spacecraftPosition.subtractPosition(agentPosition.addPosition(pos)).manhattan()
         );
 
         availableDirections.sort(manhattanComparator);
@@ -103,35 +114,23 @@ public class Agent extends Thread {
     private void selectMovement() {
         if (!hasSample) {
             Direction randomDirection = randomDirection();
-            Position squarePosition = position.addDirection(randomDirection);
+            Position squarePosition = agentPosition.addDirection(randomDirection);
             if (isType(matrix, squarePosition, typeSample)) {
-                grabSample(position.addDirection(randomDirection));
-                move(position.addDirection(randomDirection));
+                grabSample(agentPosition.addDirection(randomDirection));
+                move(agentPosition.addDirection(randomDirection));
             } else if (isType(matrix, squarePosition, typeEmpty)) {
-                move(position.addDirection(randomDirection));
+                move(agentPosition.addDirection(randomDirection));
             }
         } else {
-            move(position.addDirection(spacecraftDirection())); // Moverse a la nave
+            move(agentPosition.addDirection(spacecraftDirection())); // Moverse a la nave
 
-            if (position.subtractPosition(spacecraftPosition).manhattan() <= 1) {
+            if (agentPosition.subtractPosition(spacecraftPosition).manhattan() <= 1) {
                 dropSample();
             }
         }
     }
 
-    private void mapSamples() {
-        for (int i = 0; i < matrix.length; ++i) {
-            for (int j = 0; j < matrix[0].length; ++j) {
-                String objectName = board[i][j].getName();
-                if (objectName != null) {
-                    Integer objectType = OBJECT_TYPES.get(objectName);
-                    if (objectType != null) {
-                        matrix[i][j] = objectType;
-                    }
-                }
-            }
-        }
-    }
+
 
 
     @Override
