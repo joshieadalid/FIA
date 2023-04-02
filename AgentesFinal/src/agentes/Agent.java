@@ -31,9 +31,9 @@ public class Agent extends Thread {
         board[agentPosition.i()][agentPosition.j()].setIcon(agentIcon);
     }
 
-    private static Position findSpacecraftPosition(int[][] matrix) {
-        for (int i = 0; i < matrix.length; ++i) {
-            for (int j = 0; j < matrix[0].length; ++j) {
+    private static Position findSpacecraftPosition(int[][] matrix){
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
                 if (matrix[i][j] == typeSpacecraft) {
                     return new Position(i, j);
                 }
@@ -41,6 +41,7 @@ public class Agent extends Thread {
         }
         return null;
     }
+
 
     @Override
     public void run() {
@@ -56,6 +57,7 @@ public class Agent extends Thread {
             }
         }
     }
+
     private void mapSamples() {
         for (int i = 0; i < matrix.length; ++i) {
             for (int j = 0; j < matrix[0].length; ++j) {
@@ -69,6 +71,7 @@ public class Agent extends Thread {
             }
         }
     }
+
     public synchronized void refresh() {
         lastSquare.setIcon(null); // Elimina su figura de la casilla anterior
         board[agentPosition.i()][agentPosition.j()].setIcon(agentIcon); // Pone su figura en la nueva casilla
@@ -105,7 +108,6 @@ public class Agent extends Thread {
     }
 
 
-
     private void selectMovement() {
         if (!hasSample) {
             Direction randomDirection = randomDirection();
@@ -124,8 +126,6 @@ public class Agent extends Thread {
             }
         }
     }
-
-
 
 
     @Override

@@ -84,16 +84,14 @@ public class Scene extends JFrame {
 
 
     private void createBoard(int dim) {
-        IntStream.range(0, dim)
-                .forEach(i ->
-                        IntStream.range(0, dim)
-                                .forEach(j -> {
-                                    board[i][j] = new JLabel();
-                                    board[i][j].setBounds(j * 50 + 12, i * 50 + 12, 50, 50);
-                                    board[i][j].setBorder(BorderFactory.createDashedBorder(Color.white));
-                                    board[i][j].setOpaque(false);
-                                    this.add(board[i][j]);
-                                    board[i][j].addMouseListener(new MouseAdapter() {
+        IntStream.range(0, dim).forEach(i -> IntStream.range(0, dim).forEach(j -> {
+                            board[i][j] = new JLabel();
+                            board[i][j].setBounds(j * 50 + 12, i * 50 + 12, 50, 50);
+                            board[i][j].setBorder(BorderFactory.createDashedBorder(Color.white));
+                            board[i][j].setOpaque(false);
+                            this.add(board[i][j]);
+                            board[i][j].addMouseListener(
+                                    new MouseAdapter() {
                                         @Override
                                         public void mousePressed(MouseEvent e) {
                                             insertInterface(e);
@@ -103,8 +101,11 @@ public class Scene extends JFrame {
                                         public void mouseReleased(MouseEvent e) {
                                             insertInterface(e);
                                         }
-                                    });
-                                }));
+                                    }
+                            );
+                        }
+                )
+        );
     }
 
 

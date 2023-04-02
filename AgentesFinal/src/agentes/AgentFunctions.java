@@ -24,7 +24,7 @@ public class AgentFunctions {
             case 1 -> new Direction(+1, 0); // Abajo
             case 2 -> new Direction(0, -1); // Izquierda
             case 3 -> new Direction(0, +1); // Derecha
-            default -> new Direction(0, 0);
+            default -> null;
         };
     }
 
