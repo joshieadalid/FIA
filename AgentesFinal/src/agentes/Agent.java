@@ -1,12 +1,7 @@
 package agentes;
 
 import javax.swing.*;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.*;
 
 import static agentes.AgentFunctions.*;
 
@@ -97,19 +92,19 @@ public class Agent extends Thread {
     }
 
     public Direction spacecraftDirection() {
-        List<Position> availableDirections = Stream.of(
-                        new Position(-1, 0), new Position(1, 0), new Position(0, -1), new Position(0, 1)
-                ).filter(pos -> isType(matrix, agentPosition.addPosition(pos), typeEmpty))
-                .collect(Collectors.toList());
-
-        Comparator<Position> manhattanComparator = Comparator.comparingInt(pos ->
-                this.spacecraftPosition.subtractPosition(agentPosition.addPosition(pos)).manhattan()
-        );
-
-        availableDirections.sort(manhattanComparator);
-        System.out.println("Direccion corta: " + availableDirections.get(0).manhattan());
-        return availableDirections.get(0).getDirection();
+        return new ArrayList<>(List.of(
+                new Position(-1, 0), new Position(1, 0), new Position(0, -1), new Position(0, 1)
+        ))
+                .stream()
+                .filter(pos -> isType(matrix, agentPosition.addPosition(pos), typeEmpty))
+                .min(Comparator.comparingInt(pos ->
+                        this.spacecraftPosition.subtractPosition(agentPosition.addPosition(pos)).manhattan()
+                ))
+                .orElseThrow() // Si no hay direcciones válidas, lanza una excepción
+                .getDirection();
     }
+
+
 
     private void selectMovement() {
         if (!hasSample) {
