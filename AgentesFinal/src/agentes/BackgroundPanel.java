@@ -3,10 +3,10 @@ package agentes;
 import javax.swing.*;
 import java.awt.*;
 
-public class BackGroundPanel extends JPanel {
+public class BackgroundPanel extends JPanel {
     ImageIcon fondo;
 
-    public BackGroundPanel(ImageIcon fondo) {
+    public BackgroundPanel(ImageIcon fondo) {
         super();
         this.fondo = fondo;
         repaint();

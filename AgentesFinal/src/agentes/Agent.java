@@ -3,6 +3,7 @@ package agentes;
 import javax.swing.*;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -10,6 +11,12 @@ import java.util.stream.Stream;
 import static agentes.AgentFunctions.*;
 
 public class Agent extends Thread {
+    private static final Random waitingTime = new Random(System.nanoTime());
+    private static final Map<String, Integer> OBJECT_TYPES = Map.of(
+            "Sample", typeSample,
+            "Obstacle", typeObstacle,
+            "Spacecraft", typeSpacecraft
+    );
     private final String name;
     private final ImageIcon agentIcon;
     private final int[][] matrix;
@@ -45,9 +52,8 @@ public class Agent extends Thread {
     public void run() {
         mapSamples();
         this.spacecraftPosition = spacecraftPosition(matrix);
-        Random waitingTime = new Random(System.currentTimeMillis());
         while (true) {
-            //Algoritmo para que el robot únicamente se mueva en cruz (arriba-abajo, izquierda-derecha)
+            // Algoritmo para que el robot únicamente se mueva en cruz (arriba-abajo, izquierda-derecha)
             selectMovement();
             try {
                 Thread.sleep(100 + waitingTime.nextInt(100));
@@ -55,7 +61,6 @@ public class Agent extends Thread {
                 ex.printStackTrace();
             }
         }
-
     }
 
     public synchronized void refresh() {
@@ -81,32 +86,34 @@ public class Agent extends Thread {
     }
 
     public Direction spacecraftDirection() {
-        List<Position> distancesList = Stream.of(
+        List<Position> availableDirections = Stream.of(
                         new Position(-1, 0), new Position(1, 0), new Position(0, -1), new Position(0, 1)
-                ).filter(pos -> isType(matrix, position.sumPosition(pos), typeEmpty))
+                ).filter(pos -> isType(matrix, position.addPosition(pos), typeEmpty))
                 .collect(Collectors.toList());
 
-        Comparator<Position> sumComparator = Comparator.comparingInt(Position::manhattan);
-        distancesList.sort(sumComparator);
+        Comparator<Position> manhattanComparator = Comparator.comparingInt(pos ->
+                this.spacecraftPosition.subtractPosition(position.addPosition(pos)).manhattan()
+        );
 
-        return new Direction(distancesList.get(0).i(), distancesList.get(0).j());
+        availableDirections.sort(manhattanComparator);
+        System.out.println("Direccion corta: " + availableDirections.get(0).manhattan());
+        return availableDirections.get(0).getDirection();
     }
-
 
     private void selectMovement() {
         if (!hasSample) {
             Direction randomDirection = randomDirection();
-            Position squarePosition = position.sumDirection(randomDirection);
+            Position squarePosition = position.addDirection(randomDirection);
             if (isType(matrix, squarePosition, typeSample)) {
-                grabSample(position.sumDirection(randomDirection));
-                move(position.sumDirection(randomDirection));
+                grabSample(position.addDirection(randomDirection));
+                move(position.addDirection(randomDirection));
             } else if (isType(matrix, squarePosition, typeEmpty)) {
-                move(position.sumDirection(randomDirection));
+                move(position.addDirection(randomDirection));
             }
         } else {
-            move(position.sumDirection(spacecraftDirection())); // Moverse a la nave
-            Direction diff = absPosition(position.subtractPosition(spacecraftPosition));
-            if (diff.i() + diff.j() <= 1) {
+            move(position.addDirection(spacecraftDirection())); // Moverse a la nave
+
+            if (position.subtractPosition(spacecraftPosition).manhattan() <= 1) {
                 dropSample();
             }
         }
@@ -114,19 +121,18 @@ public class Agent extends Thread {
 
     private void mapSamples() {
         for (int i = 0; i < matrix.length; ++i) {
-            for (int j = 0; j < matrix.length; ++j) {
-                if (board[i][j].getName() != null) {
-                    switch (board[i][j].getName()) {
-                        case "Sample" -> matrix[i][j] = typeSample;
-                        case "Obstacle" -> matrix[i][j] = typeObstacle;
-                        case "Spacecraft" -> matrix[i][j] = typeSpacecraft;
-                        default -> {
-                        }
+            for (int j = 0; j < matrix[0].length; ++j) {
+                String objectName = board[i][j].getName();
+                if (objectName != null) {
+                    Integer objectType = OBJECT_TYPES.get(objectName);
+                    if (objectType != null) {
+                        matrix[i][j] = objectType;
                     }
                 }
             }
         }
     }
+
 
     @Override
     public String toString() {

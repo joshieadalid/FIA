@@ -17,7 +17,7 @@ public class Scene extends JFrame {
     private ImageIcon selectedIcon;
 
     public Scene() {
-        BackGroundPanel fondo = new BackGroundPanel(new ImageIcon("img/surface.jpg"));
+        BackgroundPanel fondo = new BackgroundPanel(new ImageIcon("img/surface.jpg"));
         this.setContentPane(fondo);
         this.setTitle("Agentes");
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);

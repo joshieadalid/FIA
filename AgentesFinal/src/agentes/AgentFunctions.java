@@ -16,25 +16,21 @@ public class AgentFunctions {
         return inBounds(matrix, position) && matrix[position.i()][position.j()] == type;
     }
 
-
+    private static final Random directionSelect = new Random(System.nanoTime());
     public static Direction randomDirection() {
-        int dirSelect = new Random(System.currentTimeMillis()).nextInt(4) + 1;
+        int dirSelect = directionSelect.nextInt(4);
         return switch (dirSelect) {
-            case 1 -> new Direction(-1, 0); // Arriba
-            case 2 -> new Direction(+1, 0); // Abajo
-            case 3 -> new Direction(0, -1); // Izquierda
-            case 4 -> new Direction(0, +1); // Derecha
+            case 0 -> new Direction(-1, 0); // Arriba
+            case 1 -> new Direction(+1, 0); // Abajo
+            case 2 -> new Direction(0, -1); // Izquierda
+            case 3 -> new Direction(0, +1); // Derecha
             default -> new Direction(0, 0);
         };
     }
 
+
     public static Position randomMatrixPosition(int i, int j) {
         Random r = new Random(System.currentTimeMillis());
         return new Position(r.nextInt(i), r.nextInt(j));
-    }
-
-
-    public static Direction absPosition(Position position) {
-        return new Direction(Math.abs(position.i()), Math.abs(position.j()));
     }
 }
