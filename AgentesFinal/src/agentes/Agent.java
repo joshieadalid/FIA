@@ -7,11 +7,10 @@ import static agentes.AgentFunctions.*;
 
 public class Agent extends Thread {
     private static final Random waitingTime = new Random(System.nanoTime());
-    private static final Map<String, Integer> OBJECT_TYPES = Map.of(
-            "Sample", typeSample,
-            "Obstacle", typeObstacle,
-            "Spacecraft", typeSpacecraft
-    );
+    private static final Map<String, Integer> OBJECT_TYPES = Map.of("Sample", typeSample, "Obstacle", typeObstacle, "Spacecraft", typeSpacecraft);
+    private static final Position[] DIRECTIONS = {
+            new Position(-1, 0), new Position(1, 0), new Position(0, -1), new Position(0, 1)
+    };
     private final String name;
     private final ImageIcon agentIcon;
     private final int[][] matrix;
@@ -31,7 +30,7 @@ public class Agent extends Thread {
         board[agentPosition.i()][agentPosition.j()].setIcon(agentIcon);
     }
 
-    private static Position findSpacecraftPosition(int[][] matrix){
+    private static Position findSpacecraftPosition(int[][] matrix) {
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[0].length; j++) {
                 if (matrix[i][j] == typeSpacecraft) {
@@ -42,16 +41,15 @@ public class Agent extends Thread {
         return null;
     }
 
-
     @Override
     public void run() {
         mapSamples();
         this.spacecraftPosition = findSpacecraftPosition(matrix);
         while (true) {
             // Algoritmo para que el robot únicamente se mueva en cruz (arriba-abajo, izquierda-derecha)
-            selectMovement();
+            behaviorMove();
             try {
-                Thread.sleep(100 + waitingTime.nextInt(100));
+                Thread.sleep(250 + waitingTime.nextInt(100));
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
@@ -77,7 +75,7 @@ public class Agent extends Thread {
         board[agentPosition.i()][agentPosition.j()].setIcon(agentIcon); // Pone su figura en la nueva casilla
     }
 
-    private void move(Position position) {
+    private void moveTo(Position position) {
         lastSquare = board[this.agentPosition.i()][this.agentPosition.j()];
         this.agentPosition = position;
         refresh();
@@ -94,42 +92,56 @@ public class Agent extends Thread {
         hasSample = false;
     }
 
-    public Direction spacecraftDirection() {
-        return new ArrayList<>(List.of(
+    private Direction spacecraftDirection() {
+        List<Position> directions = Arrays.asList(
                 new Position(-1, 0), new Position(1, 0), new Position(0, -1), new Position(0, 1)
-        ))
-                .stream()
-                .filter(pos -> isType(matrix, agentPosition.addPosition(pos), typeEmpty))
-                .min(Comparator.comparingInt(pos ->
-                        this.spacecraftPosition.subtractPosition(agentPosition.addPosition(pos)).manhattan()
-                ))
-                .orElseThrow() // Si no hay direcciones válidas, lanza una excepción
-                .getDirection();
+        );
+
+        Collections.shuffle(directions);
+
+        Optional<Position> direction = directions.stream()
+                .parallel()
+                .filter(pos -> isType(matrix, agentPosition.plus(pos), typeEmpty))
+                .min(Comparator.comparingInt(pos -> this.spacecraftPosition.minus(agentPosition.plus(pos)).manhattan()));
+
+        return direction.map(Position::getDirection).orElse(null);
+    }
+
+    public Direction samplesDirection() {
+        List<Position> directions = Arrays.asList(
+                new Position(-1, 0), new Position(1, 0), new Position(0, -1), new Position(0, 1)
+        );
+
+        Collections.shuffle(directions);
+
+        return directions.parallelStream()
+                .filter(dir -> isType(matrix, agentPosition.plus(dir), typeSample) || isType(matrix, agentPosition.plus(dir), typeEmpty))
+                .sorted((dir1, dir2) -> {
+                    boolean dir1IsSample = isType(matrix, agentPosition.plus(dir1), typeSample);
+                    boolean dir2IsSample = isType(matrix, agentPosition.plus(dir2), typeSample);
+                    return Boolean.compare(dir2IsSample, dir1IsSample);
+                })
+                .map(Position::getDirection)
+                .findFirst()
+                .orElse(null);
     }
 
 
-    private void selectMovement() {
-        if (!hasSample) {
-            Direction randomDirection = randomDirection();
-            Position squarePosition = agentPosition.addDirection(randomDirection);
-            if (isType(matrix, squarePosition, typeSample)) {
-                grabSample(agentPosition.addDirection(randomDirection));
-                move(agentPosition.addDirection(randomDirection));
-            } else if (isType(matrix, squarePosition, typeEmpty)) {
-                move(agentPosition.addDirection(randomDirection));
-            }
-        } else {
-            move(agentPosition.addDirection(spacecraftDirection())); // Moverse a la nave
 
-            if (agentPosition.subtractPosition(spacecraftPosition).manhattan() <= 1) {
+
+    private void behaviorMove() {
+        if (!hasSample) {
+            Position movingTo = agentPosition.plus(samplesDirection());
+            if (isType(matrix, movingTo, typeSample)) {
+                grabSample(movingTo);
+            }
+            moveTo(movingTo);
+        } else {
+            if (agentPosition.minus(spacecraftPosition).manhattan() <= 1) {
                 dropSample();
             }
+
+            moveTo(agentPosition.plus(spacecraftDirection())); // Moverse a la nave
         }
-    }
-
-
-    @Override
-    public String toString() {
-        return name;
     }
 }

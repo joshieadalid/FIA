@@ -12,13 +12,13 @@ public class Scene extends JFrame {
     private final JLabel[][] board = new JLabel[dim][dim];
     private final Agent wallE;
     private final Agent eva;
-    private ImageIcon obstacleIcon = new ImageIcon("img/bomb.png");
-    private ImageIcon sampleIcon = new ImageIcon("img/sample.png");
-    private ImageIcon spacecraftIcon = new ImageIcon("img/spacecraft.png");
+    private ImageIcon obstacleIcon = new ImageIcon("AgentesFinal/img/bomb.png");
+    private ImageIcon sampleIcon = new ImageIcon("AgentesFinal/img/sample.png");
+    private ImageIcon spacecraftIcon = new ImageIcon("AgentesFinal/img/spacecraft.png");
     private ImageIcon selectedIcon;
 
     public Scene() {
-        BackgroundPanel fondo = new BackgroundPanel(new ImageIcon("img/surface.jpg"));
+        BackgroundPanel fondo = new BackgroundPanel(new ImageIcon("AgentesFinal/img/surface.jpg"));
         this.setContentPane(fondo);
         this.setTitle("Agentes");
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -46,10 +46,10 @@ public class Scene extends JFrame {
         settings.add(obstacleOption);
         settings.add(sampleOption);
 
-        ImageIcon walleIcon = new ImageIcon("img/wall-e.png");
+        ImageIcon walleIcon = new ImageIcon("AgentesFinal/img/wall-e.png");
         walleIcon = new ImageIcon(walleIcon.getImage().getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH));
 
-        ImageIcon evaIcon = new ImageIcon("img/eva.png");
+        ImageIcon evaIcon = new ImageIcon("AgentesFinal/img/eva.png");
         evaIcon = new ImageIcon(evaIcon.getImage().getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH));
 
 

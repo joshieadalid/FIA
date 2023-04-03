@@ -1,8 +1,19 @@
 package agentes;
 
-public record Node(Position position, double distance) {
+public record Node(Node parent, Position position, int manhattan) implements Comparable<Node> {
+    public Node(Node parent, Position position, int manhattan) {
+        this.parent = parent;
+        this.position = position;
+        this.manhattan = manhattan;
+    }
+
     @Override
     public String toString() {
-        return "Node{pos=" + position + ", distance=" + distance + '}';
+        return "Node{" + ", position=" + position + ", manhattan=" + manhattan + '}';
+    }
+
+    @Override
+    public int compareTo(Node o) {
+        return Double.compare(this.manhattan, o.manhattan);
     }
 }

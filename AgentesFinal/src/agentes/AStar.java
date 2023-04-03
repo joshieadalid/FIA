@@ -2,123 +2,60 @@ package agentes;
 
 import java.util.*;
 
-import static agentes.AgentFunctions.isType;
-import static agentes.AgentFunctions.typeEmpty;
-
 public class AStar {
-    private final int[][] matrix;
-    private final Position goal;
+    private static List<Node> neighbors(int[][] matrix, Node current, Position end) {
+        List<Direction> directions = Arrays.asList(new Direction(-1, 0), new Direction(1, 0), new Direction(0, -1), new Direction(0, 1));
+        directions = directions.stream().filter(dir -> AgentFunctions.isType(matrix, current.position().plus(dir), AgentFunctions.typeEmpty)).toList();
+        List<Node> nodeList = new ArrayList<>();
 
-    public AStar(int[][] matrix, Position goal) {
-        this.matrix = matrix;
-        this.goal = goal;
+        for (Direction i : directions) {
+            Position nextPosition = current.position().plus(i);
+            nodeList.add(new Node(current, nextPosition, nextPosition.manhattan(end)));
+        }
+        return nodeList;
     }
 
-    private static List<Position> reconstructPath(Map<Position, Position> cameFrom, Position current) {
-        List<Position> path = new ArrayList<>();
-        path.add(current);
-
-        while (cameFrom.containsKey(current)) {
-            current = cameFrom.get(current);
-            path.add(0, current);
+    private static void openNodes(PriorityQueue<Node> open, Map<Position, Node> closed, List<Node> toAdd) {
+        for (Node i : toAdd) {
+            if (!closed.containsKey(i.position())) {
+                open.add(i);
+            }
         }
+    }
 
-        return path;
+    private static void closeBestNode(PriorityQueue<Node> open, Map<Position, Node> closed, int[][] matrix, Position endPosition) {
+        Node best = open.poll();
+        if (best != null) {
+            closed.put(best.position(), best); // Poner en cerrados
+            openNodes(open, closed, neighbors(matrix, best, endPosition)); // Agrega a lista sus hijos
+        } else {
+            System.out.println("?");
+        }
     }
 
     public static void main(String[] args) {
-        int[][] matrix = {
-                {0, 0, 0, 0, 0, 0, 0},
-                {0, 1, 1, 1, 1, 1, 0},
-                {0, 1, 0, 0, 0, 1, 0},
-                {0, 1, 0, 1, 0, 1, 0},
-                {0, 1, 0, 0, 0, 1, 0},
-                {0, 1, 1, 1, 1, 1, 0},
-                {0, 0, 0, 0, 0, 0, 0}
-        };
+        Position startPosition = new Position(1, 1);
+        Position endPosition = new Position(3, 3);
 
-        Position start = new Position(0, 0);
-        Position goal = new Position(6, 6);
+        PriorityQueue<Node> open = new PriorityQueue<>();
+        Map<Position, Node> closed = new HashMap<>();
 
-        AStar pathfinder = new AStar(matrix, goal);
-        List<Position> path = pathfinder.findPath(start);
+        int[][] matrix = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}};
 
-        if (path != null) {
-            for (Position pos : path) {
-                System.out.println(pos);
-            }
-        } else {
-            System.out.println("No se encontró un camino");
+        Node start = new Node(null, startPosition, startPosition.manhattan(endPosition));
+
+        open.add(start);
+        closeBestNode(open,closed,matrix,endPosition);
+        closeBestNode(open,closed,matrix,endPosition);
+        closeBestNode(open,closed,matrix,endPosition);
+
+        System.out.println("Abiertos: ");
+        for (Node i : open) {
+            System.out.println(i + ", ");
         }
-    }
-
-    private double heuristic(Position pos1, Position pos2) {
-        // distancia euclidiana
-        return Math.sqrt(Math.pow(pos1.i() - pos2.i(), 2) + Math.pow(pos1.j() - pos2.j(), 2));
-    }
-
-    private List<Position> getNeighbors(Position pos) {
-        List<Position> neighbors = new ArrayList<>();
-
-        Position up = new Position(pos.i() - 1, pos.j());
-        Position down = new Position(pos.i() + 1, pos.j());
-        Position left = new Position(pos.i(), pos.j() - 1);
-        Position right = new Position(pos.i(), pos.j() + 1);
-
-        if (isType(matrix, up, typeEmpty)) {
-            neighbors.add(up);
+        System.out.println("Cerrados: ");
+        for (Node i : closed.values()) {
+            System.out.println(i + ", ");
         }
-
-        if (isType(matrix, down, typeEmpty)) {
-            neighbors.add(down);
-        }
-
-        if (isType(matrix, left, typeEmpty)) {
-            neighbors.add(left);
-        }
-
-        if (isType(matrix, right, typeEmpty)) {
-            neighbors.add(right);
-        }
-
-        return neighbors;
-    }
-
-    private List<Position> findPath(Position start) {
-        PriorityQueue<Node> openSet = new PriorityQueue<>(Comparator.comparingDouble(Node::distance));
-        Map<Position, Double> gScore = new HashMap<>();
-        Map<Position, Double> fScore = new HashMap<>();
-        Map<Position, Position> cameFrom = new HashMap<>();
-
-        gScore.put(start, 0.0);
-        fScore.put(start, heuristic(start, goal));
-
-        openSet.add(new Node(start, fScore.get(start)));
-
-        while (!openSet.isEmpty()) {
-            Node current = openSet.poll();
-
-            if (matrix[current.position().i()][current.position().j()] == 3) {
-                // se ha encontrado el nodo objetivo, reconstruir el camino y devolverlo
-                return reconstructPath(cameFrom, current.position());
-            }
-
-            for (Position neighbor : getNeighbors(current.position())) {
-                double tentativeGScore = gScore.getOrDefault(current.position(), Double.POSITIVE_INFINITY) + 1.0;
-
-                if (tentativeGScore < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
-                    cameFrom.put(neighbor, current.position());
-                    gScore.put(neighbor, tentativeGScore);
-                    fScore.put(neighbor, tentativeGScore + heuristic(neighbor, goal));
-
-                    if (!openSet.contains(new Node(neighbor, fScore.get(neighbor)))) {
-                        openSet.add(new Node(neighbor, fScore.get(neighbor)));
-                    }
-                }
-            }
-        }
-
-        // no se encontró un camino
-        return null;
     }
 }

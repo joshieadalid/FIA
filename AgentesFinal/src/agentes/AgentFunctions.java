@@ -7,7 +7,7 @@ public class AgentFunctions {
     public static final int typeSample = 1;
     public static final int typeObstacle = 2;
     public static final int typeSpacecraft = 3;
-    private static final Random random = new Random(System.nanoTime());
+    public static final Random random = new Random(System.nanoTime());
 
     public static boolean inBounds(int[][] matrix, Position position) {
         return (position.i() >= 0 && position.i() < matrix.length && position.j() >= 0 && position.j() < matrix[0].length);
