@@ -3,13 +3,11 @@ package agentes;
 import javax.swing.*;
 import java.util.*;
 
-import static agentes.AStar.printPath;
 import static agentes.AgentFunctions.*;
 
 public class Agent extends Thread {
     private static final Random waitingTime = new Random(System.nanoTime());
     private static final Map<String, Integer> OBJECT_TYPES = Map.of("Sample", typeSample, "Obstacle", typeObstacle, "Spacecraft", typeSpacecraft);
-    private static final Position[] DIRECTIONS = {new Position(-1, 0), new Position(1, 0), new Position(0, -1), new Position(0, 1)};
     private final String name;
     private final ImageIcon agentIcon;
     private final int[][] matrix;
@@ -18,7 +16,9 @@ public class Agent extends Thread {
     private Position agentPosition;
     private Position spacecraftPosition;
     private boolean hasSample;
-    private JLabel lastSquare;
+    private JLabel lastIcon;
+    private List<Position> path = new ArrayList<>();
+    private int currentPathIndex = 1;
 
     public Agent(String name, ImageIcon agentIcon, int[][] matrix, JLabel[][] board) {
         this.name = name;
@@ -26,7 +26,7 @@ public class Agent extends Thread {
         this.matrix = matrix;
         this.board = board;
         this.hasSample = false;
-        this.agentPosition = randomMatrixPosition(matrix.length, matrix[0].length);
+        this.agentPosition = randomMatrixPosition(matrix);
         board[agentPosition.i()][agentPosition.j()].setIcon(agentIcon);
     }
 
@@ -60,23 +60,21 @@ public class Agent extends Thread {
         }
     }
 
-
     @Override
     public void run() {
         mapSamples();
         this.spacecraftPosition = findSpacecraftPosition(matrix);
         while (true) {
             // Algoritmo para que el robot únicamente se mueva en cruz (arriba-abajo, izquierda-derecha)
-            behaviorMove();
+            moveAgent();
             try {
-                Thread.sleep(250 + waitingTime.nextInt(100));
+                Thread.sleep(350 + waitingTime.nextInt(100));
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
         }
     }
-    private List<Position> path = new ArrayList<>();
-    private int i = 1;
+
     private void mapSamples() {
         for (int i = 0; i < matrix.length; ++i) {
             for (int j = 0; j < matrix[0].length; ++j) {
@@ -92,75 +90,63 @@ public class Agent extends Thread {
     }
 
     public synchronized void refresh() {
-        lastSquare.setIcon(null); // Elimina su figura de la casilla anterior
-        board[agentPosition.i()][agentPosition.j()].setIcon(agentIcon); // Pone su figura en la nueva casilla
+        board[agentPosition.i()][agentPosition.j()].setIcon(agentIcon);
     }
 
     private void moveTo(Position position) {
-        lastSquare = board[this.agentPosition.i()][this.agentPosition.j()];
+        board[agentPosition.i()][agentPosition.j()].setIcon(null);
         this.agentPosition = position;
         refresh();
     }
 
+
     private void grabSampleFrom(Position position) {
-        System.out.println(name + ": Sample grabbed");
         hasSample = true;
         matrix[position.i()][position.j()] = 0;
     }
 
     private void dropSample() {
-        System.out.println(name + ": Sample dropped");
         hasSample = false;
     }
 
-    private Direction spacecraftDirection() {
+    public Position samplesDirection() {
         List<Position> directions = Arrays.asList(new Position(-1, 0), new Position(1, 0), new Position(0, -1), new Position(0, 1));
-
         Collections.shuffle(directions);
 
-        Optional<Position> direction = directions.stream().parallel().filter(pos -> isType(matrix, agentPosition.plus(pos), typeEmpty)).min(Comparator.comparingInt(pos -> this.spacecraftPosition.minus(agentPosition.plus(pos)).manhattan()));
-
-        return direction.map(Position::getDirection).orElse(null);
+        return directions.stream()
+                .filter(dir -> isType(matrix, agentPosition.plus(dir), typeSample) || isType(matrix, agentPosition.plus(dir), typeEmpty)).min(Comparator.comparingInt(dir -> isType(matrix, agentPosition.plus(dir), typeSample) ? 0 : 1))
+                .orElse(null);
     }
 
-    public Direction samplesDirection() {
-        List<Position> directions = Arrays.asList(new Position(-1, 0), new Position(1, 0), new Position(0, -1), new Position(0, 1));
-
-        Collections.shuffle(directions);
-
-        return directions.parallelStream().filter(dir -> isType(matrix, agentPosition.plus(dir), typeSample) || isType(matrix, agentPosition.plus(dir), typeEmpty)).sorted((dir1, dir2) -> {
-            boolean dir1IsSample = isType(matrix, agentPosition.plus(dir1), typeSample);
-            boolean dir2IsSample = isType(matrix, agentPosition.plus(dir2), typeSample);
-            return Boolean.compare(dir2IsSample, dir1IsSample);
-        }).map(Position::getDirection).findFirst().orElse(null);
-    }
-
-    private void moveToSpacecraft(List<Position> path, int i) {
-        moveTo(path.get(i));
-        dropSample();
-    }
-
-    private void behaviorMove() {
-
-
+    private void moveAgent() {
         if (!hasSample) {
-            Position movingTo = agentPosition.plus(samplesDirection());
-            if (isType(matrix, movingTo, typeSample)) {
-                grabSampleFrom(movingTo);
-                path = new AStar(matrix, agentPosition, spacecraftPosition).findPath();
-                printPath(path);
-            }
-            moveTo(movingTo);
+            moveTowardsSample();
         } else {
-            System.out.println("Con muestra");
-            if (i < path.size() - 1) {
-                moveTo(path.get(i));
-                ++i;
-            } else {
-                i = 1;
-                path = null;
-                dropSample();
-            }
+            followPathToSpacecraft();
         }
     }
+
+    private void moveTowardsSample() {
+        Position targetPosition = agentPosition.plus(samplesDirection());
+        if (isType(matrix, targetPosition, typeSample)) {
+            grabSampleFrom(targetPosition);
+            // Elige todas las posiciones menos la primera y la última
+            path = new AStar(matrix, agentPosition, spacecraftPosition).findPath();
+            path = path.subList(1, path.size() - 1);
+        }
+        moveTo(targetPosition);
+
+    }
+
+    private void followPathToSpacecraft() {
+        if (currentPathIndex < path.size()) {
+            moveTo(path.get(currentPathIndex));
+            currentPathIndex++;
+        } else {
+            currentPathIndex = 1;
+            path = null;
+            dropSample();
+        }
+    }
+
 }

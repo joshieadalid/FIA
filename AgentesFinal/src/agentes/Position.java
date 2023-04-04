@@ -1,29 +1,21 @@
 package agentes;
 
 public record Position(int i, int j) {
-    public Direction getDirection(){
-        return new Direction(i(), j());
-    }
     public Position plus(Position pos) {
-        return new Position(this.i() + pos.i(), this.j() + pos.j());
-    }
-    public Position plus(Direction dir) {
-        return new Position(this.i() + dir.i(), this.j() + dir.j());
+        return new Position(i() + pos.i(), j() + pos.j());
     }
 
     public Position minus(Position pos) {
-        return new Position(this.i() - pos.i(), this.j() - pos.j());
-    }
-    public int manhattan() {
-        return Math.abs(i) + Math.abs(j);
+        return new Position(i() - pos.i(), j() - pos.j());
     }
 
-    public int manhattan(Position second) {
-        return this.minus(second).manhattan();
+    public int manhattan(final Position second) {
+        Position diff = minus(second);
+        return Math.abs(diff.i) + Math.abs(diff.j);
     }
 
     @Override
     public String toString() {
-        return "Position{" + "i=" + i + ", j=" + j + '}';
+        return "Position{" + "i=" + this.i + ", j=" + this.j + '}';
     }
 }

@@ -17,19 +17,7 @@ public class AgentFunctions {
         return inBounds(matrix, position) && matrix[position.i()][position.j()] == type;
     }
 
-    public static Direction randomDirection() {
-        int dirSelect = random.nextInt(4);
-        return switch (dirSelect) {
-            case 0 -> new Direction(-1, 0); // Arriba
-            case 1 -> new Direction(+1, 0); // Abajo
-            case 2 -> new Direction(0, -1); // Izquierda
-            case 3 -> new Direction(0, +1); // Derecha
-            default -> null;
-        };
-    }
-
-
-    public static Position randomMatrixPosition(int i, int j) {
-        return new Position(random.nextInt(i), random.nextInt(j));
+    public static Position randomMatrixPosition(int[][] matrix) {
+        return new Position(random.nextInt(matrix.length), random.nextInt(matrix[0].length));
     }
 }

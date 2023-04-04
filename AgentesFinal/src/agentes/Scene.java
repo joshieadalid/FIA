@@ -12,13 +12,13 @@ public class Scene extends JFrame {
     private final JLabel[][] board = new JLabel[dim][dim];
     private final Agent wallE;
     private final Agent eva;
-    private ImageIcon obstacleIcon = new ImageIcon("AgentesFinal/img/bomb.png");
-    private ImageIcon sampleIcon = new ImageIcon("AgentesFinal/img/sample.png");
-    private ImageIcon spacecraftIcon = new ImageIcon("AgentesFinal/img/spacecraft.png");
+    private ImageIcon obstacleIcon = new ImageIcon("img/bomb.png");
+    private ImageIcon sampleIcon = new ImageIcon("img/sample.png");
+    private ImageIcon spacecraftIcon = new ImageIcon("img/spacecraft.png");
     private ImageIcon selectedIcon;
 
     public Scene() {
-        BackgroundPanel fondo = new BackgroundPanel(new ImageIcon("AgentesFinal/img/surface.jpg"));
+        BackgroundPanel fondo = new BackgroundPanel(new ImageIcon("img/surface.jpg"));
         this.setContentPane(fondo);
         this.setTitle("Agentes");
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -46,16 +46,16 @@ public class Scene extends JFrame {
         settings.add(obstacleOption);
         settings.add(sampleOption);
 
-        ImageIcon walleIcon = new ImageIcon("AgentesFinal/img/wall-e.png");
-        walleIcon = new ImageIcon(walleIcon.getImage().getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH));
+        ImageIcon wallEIcon = new ImageIcon("img/wall-e.png");
+        wallEIcon = new ImageIcon(wallEIcon.getImage().getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH));
 
-        ImageIcon evaIcon = new ImageIcon("AgentesFinal/img/eva.png");
+        ImageIcon evaIcon = new ImageIcon("img/eva.png");
         evaIcon = new ImageIcon(evaIcon.getImage().getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH));
 
 
         this.setLayout(null);
         int[][] matrix = new int[dim][dim];
-        createBoard(dim);
+        createBoard();
         exit.addActionListener(this::exitInterface);
         run.addActionListener(this::runInterface);
 
@@ -72,18 +72,16 @@ public class Scene extends JFrame {
         addWindowListener(new MyWindowAdapter());
 
         // Crea 2 agentes
-        wallE = new Agent("Wall-E", walleIcon, matrix, board);
+        wallE = new Agent("Wall-E", wallEIcon, matrix, board);
         eva = new Agent("Eva", evaIcon, matrix, board);
 
     }
-
 
     private void exitInterface(ActionEvent eventObject) {
         System.exit(0);
     }
 
-
-    private void createBoard(int dim) {
+    private void createBoard() {
         IntStream.range(0, dim).forEach(i -> IntStream.range(0, dim).forEach(j -> {
                             board[i][j] = new JLabel();
                             board[i][j].setBounds(j * 50 + 12, i * 50 + 12, 50, 50);

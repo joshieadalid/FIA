@@ -2,7 +2,6 @@ package agentes;
 
 import java.util.*;
 
-import static agentes.Agent.printMatrix;
 import static agentes.AgentFunctions.typeEmpty;
 import static agentes.AgentFunctions.typeSpacecraft;
 
@@ -12,16 +11,12 @@ public class AStar {
     private final Position end;
 
     public AStar(int[][] matrix, Position start, Position end) {
-        System.out.printf("""
-                Posición inicial: %s
-                Posición final: %s%n""", start, end);
-        printMatrix(matrix);
         this.matrix = matrix;
         this.start = start;
         this.end = end;
     }
 
-    public static void printPath(List<Position> path){
+    public static void printPath(List<Position> path) {
         if (path != null) {
             System.out.println("Path found:");
             for (Position position : path) {
@@ -83,14 +78,15 @@ public class AStar {
     }
 
     private List<Node> getNeighbors(Node node) {
-        List<Direction> directions = Arrays.asList(new Direction(-1, 0), new Direction(1, 0), new Direction(0, -1), new Direction(0, 1));
+        Position pos = node.position();
+        List<Node> neighbors = new ArrayList<>(4);
+        int[][] dirMatrix = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
-        List<Node> neighbors = new ArrayList<>();
-
-        for (Direction dir : directions) {
-            Position nextPos = node.position().plus(dir);
-
-            if (AgentFunctions.isType(matrix, nextPos,typeEmpty) || AgentFunctions.isType(matrix,nextPos,typeSpacecraft)) {
+        for (int[] dir : dirMatrix) {
+            Position nextPos = pos.plus(new Position(dir[0], dir[1]));
+            boolean isTypeEmpty = AgentFunctions.isType(matrix, nextPos, typeEmpty);
+            boolean isTypeSpacecraft = AgentFunctions.isType(matrix, nextPos, typeSpacecraft);
+            if (isTypeEmpty || isTypeSpacecraft) {
                 Node neighbor = new Node(node, nextPos, nextPos.manhattan(end));
                 neighbors.add(neighbor);
             }
@@ -98,6 +94,7 @@ public class AStar {
 
         return neighbors;
     }
+
 
     private List<Position> buildPath(Node endNode) {
         List<Position> path = new ArrayList<>();
