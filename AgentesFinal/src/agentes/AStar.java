@@ -2,24 +2,26 @@ package agentes;
 
 import java.util.*;
 
+import static agentes.Agent.printMatrix;
+import static agentes.AgentFunctions.typeEmpty;
+import static agentes.AgentFunctions.typeSpacecraft;
+
 public class AStar {
     private final int[][] matrix;
     private final Position start;
     private final Position end;
 
     public AStar(int[][] matrix, Position start, Position end) {
+        System.out.printf("""
+                Posición inicial: %s
+                Posición final: %s%n""", start, end);
+        printMatrix(matrix);
         this.matrix = matrix;
         this.start = start;
         this.end = end;
     }
 
-    public static void main(String[] args) {
-        int[][] matrix = {{0, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 1, 0}, {0, 0, 1, 0}};
-        Position startPosition = new Position(3, 0);
-        Position endPosition = new Position(3, 3);
-        AStar resolver = new AStar(matrix, startPosition, endPosition);
-        List<Position> path = resolver.findPath();
-
+    public static void printPath(List<Position> path){
         if (path != null) {
             System.out.println("Path found:");
             for (Position position : path) {
@@ -28,6 +30,27 @@ public class AStar {
         } else {
             System.out.println("Path not found");
         }
+    }
+
+    public static void main(String[] args) {
+        int[][] matrix = {
+                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0}};
+        Position startPosition = new Position(0, 0);
+        Position endPosition = new Position(11, 11);
+        AStar resolver = new AStar(matrix, startPosition, endPosition);
+        List<Position> path = resolver.findPath();
+        printPath(path);
     }
 
     public List<Position> findPath() {
@@ -67,20 +90,13 @@ public class AStar {
         for (Direction dir : directions) {
             Position nextPos = node.position().plus(dir);
 
-            if (inBounds(nextPos)) {
+            if (AgentFunctions.isType(matrix, nextPos,typeEmpty) || AgentFunctions.isType(matrix,nextPos,typeSpacecraft)) {
                 Node neighbor = new Node(node, nextPos, nextPos.manhattan(end));
                 neighbors.add(neighbor);
             }
         }
 
         return neighbors;
-    }
-
-    private boolean inBounds(Position pos) {
-        int i = pos.i();
-        int j = pos.j();
-
-        return i >= 0 && i < matrix.length && j >= 0 && j < matrix[0].length && matrix[i][j] == 0;
     }
 
     private List<Position> buildPath(Node endNode) {

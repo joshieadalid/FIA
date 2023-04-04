@@ -3,18 +3,18 @@ package agentes;
 import javax.swing.*;
 import java.util.*;
 
+import static agentes.AStar.printPath;
 import static agentes.AgentFunctions.*;
 
 public class Agent extends Thread {
     private static final Random waitingTime = new Random(System.nanoTime());
     private static final Map<String, Integer> OBJECT_TYPES = Map.of("Sample", typeSample, "Obstacle", typeObstacle, "Spacecraft", typeSpacecraft);
-    private static final Position[] DIRECTIONS = {
-            new Position(-1, 0), new Position(1, 0), new Position(0, -1), new Position(0, 1)
-    };
+    private static final Position[] DIRECTIONS = {new Position(-1, 0), new Position(1, 0), new Position(0, -1), new Position(0, 1)};
     private final String name;
     private final ImageIcon agentIcon;
     private final int[][] matrix;
     private final JLabel[][] board;
+
     private Position agentPosition;
     private Position spacecraftPosition;
     private boolean hasSample;
@@ -41,6 +41,26 @@ public class Agent extends Thread {
         return null;
     }
 
+    public static void printMatrix(int[][] matrix) {
+        int numRows = matrix.length;
+        int numCols = matrix[0].length;
+
+        System.out.print("   ");
+        for (int j = 0; j < numCols; j++) {
+            System.out.printf("%2d ", j);
+        }
+        System.out.println();
+
+        for (int i = 0; i < numRows; i++) {
+            System.out.printf("%2d ", i);
+            for (int j = 0; j < numCols; j++) {
+                System.out.printf("%2d ", matrix[i][j]);
+            }
+            System.out.println();
+        }
+    }
+
+
     @Override
     public void run() {
         mapSamples();
@@ -55,7 +75,8 @@ public class Agent extends Thread {
             }
         }
     }
-
+    private List<Position> path = new ArrayList<>();
+    private int i = 1;
     private void mapSamples() {
         for (int i = 0; i < matrix.length; ++i) {
             for (int j = 0; j < matrix[0].length; ++j) {
@@ -81,7 +102,7 @@ public class Agent extends Thread {
         refresh();
     }
 
-    private void grabSample(Position position) {
+    private void grabSampleFrom(Position position) {
         System.out.println(name + ": Sample grabbed");
         hasSample = true;
         matrix[position.i()][position.j()] = 0;
@@ -93,55 +114,53 @@ public class Agent extends Thread {
     }
 
     private Direction spacecraftDirection() {
-        List<Position> directions = Arrays.asList(
-                new Position(-1, 0), new Position(1, 0), new Position(0, -1), new Position(0, 1)
-        );
+        List<Position> directions = Arrays.asList(new Position(-1, 0), new Position(1, 0), new Position(0, -1), new Position(0, 1));
 
         Collections.shuffle(directions);
 
-        Optional<Position> direction = directions.stream()
-                .parallel()
-                .filter(pos -> isType(matrix, agentPosition.plus(pos), typeEmpty))
-                .min(Comparator.comparingInt(pos -> this.spacecraftPosition.minus(agentPosition.plus(pos)).manhattan()));
+        Optional<Position> direction = directions.stream().parallel().filter(pos -> isType(matrix, agentPosition.plus(pos), typeEmpty)).min(Comparator.comparingInt(pos -> this.spacecraftPosition.minus(agentPosition.plus(pos)).manhattan()));
 
         return direction.map(Position::getDirection).orElse(null);
     }
 
     public Direction samplesDirection() {
-        List<Position> directions = Arrays.asList(
-                new Position(-1, 0), new Position(1, 0), new Position(0, -1), new Position(0, 1)
-        );
+        List<Position> directions = Arrays.asList(new Position(-1, 0), new Position(1, 0), new Position(0, -1), new Position(0, 1));
 
         Collections.shuffle(directions);
 
-        return directions.parallelStream()
-                .filter(dir -> isType(matrix, agentPosition.plus(dir), typeSample) || isType(matrix, agentPosition.plus(dir), typeEmpty))
-                .sorted((dir1, dir2) -> {
-                    boolean dir1IsSample = isType(matrix, agentPosition.plus(dir1), typeSample);
-                    boolean dir2IsSample = isType(matrix, agentPosition.plus(dir2), typeSample);
-                    return Boolean.compare(dir2IsSample, dir1IsSample);
-                })
-                .map(Position::getDirection)
-                .findFirst()
-                .orElse(null);
+        return directions.parallelStream().filter(dir -> isType(matrix, agentPosition.plus(dir), typeSample) || isType(matrix, agentPosition.plus(dir), typeEmpty)).sorted((dir1, dir2) -> {
+            boolean dir1IsSample = isType(matrix, agentPosition.plus(dir1), typeSample);
+            boolean dir2IsSample = isType(matrix, agentPosition.plus(dir2), typeSample);
+            return Boolean.compare(dir2IsSample, dir1IsSample);
+        }).map(Position::getDirection).findFirst().orElse(null);
     }
 
-
-
+    private void moveToSpacecraft(List<Position> path, int i) {
+        moveTo(path.get(i));
+        dropSample();
+    }
 
     private void behaviorMove() {
+
+
         if (!hasSample) {
             Position movingTo = agentPosition.plus(samplesDirection());
             if (isType(matrix, movingTo, typeSample)) {
-                grabSample(movingTo);
+                grabSampleFrom(movingTo);
+                path = new AStar(matrix, agentPosition, spacecraftPosition).findPath();
+                printPath(path);
             }
             moveTo(movingTo);
         } else {
-            if (agentPosition.minus(spacecraftPosition).manhattan() <= 1) {
+            System.out.println("Con muestra");
+            if (i < path.size() - 1) {
+                moveTo(path.get(i));
+                ++i;
+            } else {
+                i = 1;
+                path = null;
                 dropSample();
             }
-
-            moveTo(agentPosition.plus(spacecraftDirection())); // Moverse a la nave
         }
     }
 }

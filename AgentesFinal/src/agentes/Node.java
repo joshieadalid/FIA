@@ -1,12 +1,6 @@
 package agentes;
 
 public record Node(Node parent, Position position, int manhattan) implements Comparable<Node> {
-    public Node(Node parent, Position position, int manhattan) {
-        this.parent = parent;
-        this.position = position;
-        this.manhattan = manhattan;
-    }
-
     @Override
     public String toString() {
         return "Node{" + ", position=" + position + ", manhattan=" + manhattan + '}';
