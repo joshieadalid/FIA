@@ -3,59 +3,96 @@ package agentes;
 import java.util.*;
 
 public class AStar {
-    private static List<Node> neighbors(int[][] matrix, Node current, Position end) {
-        List<Direction> directions = Arrays.asList(new Direction(-1, 0), new Direction(1, 0), new Direction(0, -1), new Direction(0, 1));
-        directions = directions.stream().filter(dir -> AgentFunctions.isType(matrix, current.position().plus(dir), AgentFunctions.typeEmpty)).toList();
-        List<Node> nodeList = new ArrayList<>();
+    private final int[][] matrix;
+    private final Position start;
+    private final Position end;
 
-        for (Direction i : directions) {
-            Position nextPosition = current.position().plus(i);
-            nodeList.add(new Node(current, nextPosition, nextPosition.manhattan(end)));
-        }
-        return nodeList;
-    }
-
-    private static void openNodes(PriorityQueue<Node> open, Map<Position, Node> closed, List<Node> toAdd) {
-        for (Node i : toAdd) {
-            if (!closed.containsKey(i.position())) {
-                open.add(i);
-            }
-        }
-    }
-
-    private static void closeBestNode(PriorityQueue<Node> open, Map<Position, Node> closed, int[][] matrix, Position endPosition) {
-        Node best = open.poll();
-        if (best != null) {
-            closed.put(best.position(), best); // Poner en cerrados
-            openNodes(open, closed, neighbors(matrix, best, endPosition)); // Agrega a lista sus hijos
-        } else {
-            System.out.println("?");
-        }
+    public AStar(int[][] matrix, Position start, Position end) {
+        this.matrix = matrix;
+        this.start = start;
+        this.end = end;
     }
 
     public static void main(String[] args) {
-        Position startPosition = new Position(1, 1);
+        int[][] matrix = {{0, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 1, 0}, {0, 0, 1, 0}};
+        Position startPosition = new Position(3, 0);
         Position endPosition = new Position(3, 3);
+        AStar resolver = new AStar(matrix, startPosition, endPosition);
+        List<Position> path = resolver.findPath();
 
+        if (path != null) {
+            System.out.println("Path found:");
+            for (Position position : path) {
+                System.out.println(position);
+            }
+        } else {
+            System.out.println("Path not found");
+        }
+    }
+
+    public List<Position> findPath() {
         PriorityQueue<Node> open = new PriorityQueue<>();
         Map<Position, Node> closed = new HashMap<>();
 
-        int[][] matrix = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}};
+        Node startNode = new Node(null, start, start.manhattan(end));
+        open.add(startNode);
 
-        Node start = new Node(null, startPosition, startPosition.manhattan(endPosition));
+        while (!open.isEmpty()) {
+            Node current = open.poll();
 
-        open.add(start);
-        closeBestNode(open,closed,matrix,endPosition);
-        closeBestNode(open,closed,matrix,endPosition);
-        closeBestNode(open,closed,matrix,endPosition);
+            if (current.position().equals(end)) {
+                // Se encontró la solución
+                return buildPath(current);
+            }
 
-        System.out.println("Abiertos: ");
-        for (Node i : open) {
-            System.out.println(i + ", ");
+            List<Node> neighbors = getNeighbors(current);
+
+            for (Node neighbor : neighbors) {
+                if (!closed.containsKey(neighbor.position())) {
+                    open.add(neighbor);
+                    closed.put(neighbor.position(), neighbor);
+                }
+            }
         }
-        System.out.println("Cerrados: ");
-        for (Node i : closed.values()) {
-            System.out.println(i + ", ");
-        }
+
+        // No se encontró la solución
+        return null;
     }
+
+    private List<Node> getNeighbors(Node node) {
+        List<Direction> directions = Arrays.asList(new Direction(-1, 0), new Direction(1, 0), new Direction(0, -1), new Direction(0, 1));
+
+        List<Node> neighbors = new ArrayList<>();
+
+        for (Direction dir : directions) {
+            Position nextPos = node.position().plus(dir);
+
+            if (inBounds(nextPos)) {
+                Node neighbor = new Node(node, nextPos, nextPos.manhattan(end));
+                neighbors.add(neighbor);
+            }
+        }
+
+        return neighbors;
+    }
+
+    private boolean inBounds(Position pos) {
+        int i = pos.i();
+        int j = pos.j();
+
+        return i >= 0 && i < matrix.length && j >= 0 && j < matrix[0].length && matrix[i][j] == 0;
+    }
+
+    private List<Position> buildPath(Node endNode) {
+        List<Position> path = new ArrayList<>();
+        Node current = endNode;
+
+        while (current != null) {
+            path.add(0, current.position());
+            current = current.parent();
+        }
+
+        return path;
+    }
+
 }
