@@ -120,7 +120,17 @@ Este código define una clase auxiliar llamada "Position" dentro del paquete "ag
 	\item El método ``toString()" devuelve una cadena de texto que representa la posición en el formato ``Position \{ i=valor\_i, j=valor\_j\}".
 \end{itemize}
 \section{Demostración de funcionamiento}
-\includegraphics[scale=0.20]{demo.jpeg}
+\includegraphics[scale=0.20]{demo.jpeg}\\
+Este es el estado inicial del juego, colocamos los obstáculos y los clústeres de muestras.
+A pesar de que los obstáculos estén bloqueando directamente a la nave, logran llegar a la nave, porque conocen el destino.
+
+\includegraphics[scale=0.20]{demo2.jpeg}\\
+Ahora hay migas, y los agentes dejan las \emph{muestras}, que en este caso son botes de basura para contaminar el mundo.
+
+\includegraphics[scale=0.20]{demo3.jpeg}\\
+\includegraphics[scale=0.20]{demo4.jpeg}\\
+\includegraphics[scale=0.20]{demo5.jpeg}\\
+Una demostración de cómo los robots siguen el rastro.
 
 \section{Conclusiones}
 En esta práctica se implementó el algoritmo A* para la búsqueda informada y se mejoró la funcionalidad de los agentes añadiendo un seguimiento de muestras. El objetivo principal del algoritmo A* es encontrar la ruta más corta entre un nodo de inicio y un nodo de destino en un grafo ponderado. Además, A* utiliza una heurística para estimar el costo restante del camino desde el nodo actual hasta el nodo objetivo, lo que le permite elegir la mejor opción de manera más efectiva que los algoritmos de búsqueda ciega. En esta práctica, la heurística utilizada por A* debe ser admisible, lo que significa que nunca debe sobreestimar el costo del camino restante. Se demostró que el algoritmo A* es un algoritmo óptimo y completo, lo que significa que siempre encuentra la ruta más corta si existe una y siempre termina si hay una solución.

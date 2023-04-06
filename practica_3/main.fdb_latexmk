@@ -1,6 +1,6 @@
 # Fdb version 4
-["pdflatex"] 1680751009 "/home/joshieadalid/Documentos/Semestre 2023-02/FIA/practica_3/main.tex" "main.pdf" "main" 1680751010 0
-  "/home/joshieadalid/Documentos/Semestre 2023-02/FIA/practica_3/main.tex" 1680751009 11094 9985eaef699231420045d2ce79d6ccea ""
+["pdflatex"] 1680754629 "/home/joshieadalid/Documentos/Semestre 2023-02/FIA/practica_3/main.tex" "main.pdf" "main" 1680754629 0
+  "/home/joshieadalid/Documentos/Semestre 2023-02/FIA/practica_3/main.tex" 1680754628 11665 bc0ceb5c50d9e9988a234d792caa0f37 ""
   "/usr/share/texmf-dist/fonts/map/fontname/texfonts.map" 1680514707 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texmf-dist/fonts/tfm/public/cm/cmbx10.tfm" 1680514707 1328 c834bbb027764024c09d3d2bf908b5f0 ""
   "/usr/share/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm" 1680514707 1324 c910af8c371558dc20f2d7822f66fe64 ""
@@ -40,10 +40,14 @@
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1680536452 8204064 390ec449db0a1e40006b0ecb0ab3c81a ""
   "Logo_IPN.png" 1679671292 189938 3fefefd1d1f6fd4c86ebb7c50dd69229 ""
   "demo.jpeg" 1680750926 378805 c38fd18bb860b0c02716d4ceb54157d5 ""
+  "demo2.jpeg" 1680754176 311215 de2cc57d18b76f60184679686ecaadb8 ""
+  "demo3.jpeg" 1680754176 309743 ff5aff1cbc37fde5da2ec1bb0c5c4ea3 ""
+  "demo4.jpeg" 1680754176 317210 5e88e15b8b00fd9a9650e2666323ff23 ""
+  "demo5.jpeg" 1680754176 316438 d6d41e4027b2926537dd2219076daf0a ""
   "escudoESCOM.png" 1679671292 17430 ba0b644bafe21ca6e2cda68575a4466e ""
-  "main.aux" 1680751010 1041 aef644616dfb62ff3151a9488824c586 "pdflatex"
-  "main.tex" 1680751009 11094 9985eaef699231420045d2ce79d6ccea ""
-  "main.toc" 1680751010 549 98550b2b6094c2c671278cfef7de6413 "pdflatex"
+  "main.aux" 1680754629 1041 7952617bccdaafd6fab4f071ca0f3225 "pdflatex"
+  "main.tex" 1680754628 11665 bc0ceb5c50d9e9988a234d792caa0f37 ""
+  "main.toc" 1680754629 549 b1d35e0f35eec33b6ee02eab8e771b08 "pdflatex"
   (generated)
   "main.aux"
   "main.log"
